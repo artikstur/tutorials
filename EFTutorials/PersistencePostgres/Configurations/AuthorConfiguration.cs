@@ -12,7 +12,8 @@ namespace PersistencePostgres.Configurations
 
             builder
                 .HasOne(a => a.Course)
-                .WithOne(c => c.Author);
+                .WithOne(c => c.Author)
+                .HasForeignKey<AuthorEntity>(a => a.CourseId);
         }
     }
 }
