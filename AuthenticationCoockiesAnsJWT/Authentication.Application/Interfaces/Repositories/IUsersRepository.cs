@@ -6,5 +6,6 @@ namespace Authentication.Application.Interfaces.Repositories
     {
         Task Add(User user);
         Task<User> GetByEmail(string email);
+        Task<List<User>> GetAllUsers();
     }
 }

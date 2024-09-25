@@ -23,8 +23,8 @@ namespace Authentication.Persistence.Repositories
             {
                 Id = user.Id,
                 UserName = user.UserName,
+                Email = user.Email,
                 PasswordHash = user.PasswordHash,
-                Email = user.Email
             };
 
             await _dbContext.Users.AddAsync(userEntity);
@@ -39,6 +39,17 @@ namespace Authentication.Persistence.Repositories
                              ?? throw new Exception();
 
             return _mapper.Map<User>(userEntity);
+        }
+
+        public async Task<List<User>> GetAllUsers()
+        {
+            var userEntities = await _dbContext.Users
+                .AsNoTracking()
+                .ToListAsync();
+
+            return userEntities
+                .Select(userEntity => _mapper.Map<User>(userEntity))
+                .ToList();
         }
     }
 }
