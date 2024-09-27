@@ -1,12 +1,15 @@
-using Authentication.API.Extensions;
-using Authentication.Application.Interfaces.Auth;
-using Authentication.Application.Interfaces.Repositories;
-using Authentication.Application.Services;
-using Authentication.Infrastructure;
-using Authentication.Persistence;
-using Authentication.Persistence.Repositories;
+using Authorization.API.Extensions;
+using Authorization.Application.Interfaces.Auth;
+using Authorization.Application.Interfaces.Repositories;
+using Authorization.Application.Services;
+using Authorization.Core.Enums;
+using Authorization.Infrastructure;
+using Authorization.Persistence;
+using Authorization.Persistence.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
+using AuthorizationOptions = Authorization.Persistence.AuthorizationOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -15,12 +18,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 
+
+builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+builder.Services.Configure<AuthorizationOptions>(configuration.GetSection(nameof(AuthorizationOptions)));
+
 builder.Services.AddDbContext<LearningDbContext>(options =>
 {
     options.UseNpgsql(configuration.GetConnectionString(nameof(LearningDbContext)));
 });
-
-builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
 builder.Services.AddApiAuthentication(configuration);
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
@@ -56,6 +61,11 @@ app.AddMappedEndpoints();
 app.MapGet("get", () =>
 {
     return Results.Ok("OK!");
-}).RequireAuthorization("AdminPolicy");
+}).RequirePermissions(Permissions.Read);
+
+app.MapPost("post", () =>
+{
+    return Results.Ok("OK!");
+}).RequirePermissions(Permissions.Create);
 
 app.Run();

@@ -1,11 +1,14 @@
 ﻿using System.Text;
-using Authentication.API.Endpoints;
-using Authentication.Infrastructure;
+using Authorization.API.Endpoints;
+using Authorization.Application.Interfaces.Auth;
+using Authorization.Application.Services;
+using Authorization.Core.Enums;
+using Authorization.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Authentication.API.Extensions
+namespace Authorization.API.Extensions
 {
     public static class ApiExtensions
     {
@@ -47,14 +50,18 @@ namespace Authentication.API.Extensions
                         }
                     };
                 });
+            services.AddScoped<IPermissionService, PermissionService>();
+            services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminPolicy", policy =>
-                {
-                    policy.RequireClaim("Admin", "true");
-                });
-            });
+            services.AddAuthorization();
+        }
+
+
+        public static IEndpointConventionBuilder RequirePermissions<TBuilder>(
+            this TBuilder builder, params Permissions[] permissions) where TBuilder : IEndpointConventionBuilder
+        {
+            return builder.RequireAuthorization(policy =>
+                policy.AddRequirements(new PermissionRequirement(permissions)));
         }
     }
 }

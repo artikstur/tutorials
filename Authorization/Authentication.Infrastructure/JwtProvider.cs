@@ -1,12 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Authentication.Application.Interfaces.Auth;
-using Authentication.Core.Models;
+using Authorization.Application.Interfaces.Auth;
+using Authorization.Core.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Authentication.Infrastructure
+namespace Authorization.Infrastructure
 {
     public class JwtProvider: IJwtProvider
     {
@@ -24,8 +24,7 @@ namespace Authentication.Infrastructure
 
             Claim[] claims =
             {
-                new ("userId", user.Id.ToString()),
-                new ("Admin", "true")
+                new Claim(CustomClaims.UserId, user.Id.ToString())
             };
 
             var signingCredentials = new SigningCredentials(
